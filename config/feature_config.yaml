@@ -1,0 +1,67 @@
+# Конфигурация фич для антифрод модели
+version: "1.0"
+
+# Параметры биннинга
+binning:
+  iv_threshold: 0.1
+  max_n_bins: 10
+
+# Временные окна для агрегатов (дни)
+time_windows:
+  - 7
+  - 30
+  - 90
+
+# Отбор фич
+feature_selection:
+  iv_threshold: 0.1
+  correlation_threshold: 0.8
+
+# Описание входных переменных (для документации)
+input_variables:
+  user_id:
+    description: "Уникальный идентификатор клиента"
+    dtype: "string"
+
+  amount:
+    description: "Сумма транзакции в рублях"
+    dtype: "float"
+
+  timestamp:
+    description: "Время транзакции"
+    dtype: "datetime"
+
+  merchant_category:
+    description: "Категория мерчанта (MCC)"
+    dtype: "category"
+
+  is_fraud:
+    description: "Целевая переменная: 1 = фрод, 0 = легитимная"
+    dtype: "int"
+
+# Генерируемые фичи (для документации и валидации)
+generated_features:
+  aggregates:
+    - name_pattern: "{col}_sum_{window}d"
+      description: "Сумма за последние {window} дней"
+    - name_pattern: "{col}_mean_{window}d"
+      description: "Среднее за последние {window} дней"
+    - name_pattern: "{col}_count_{window}d"
+      description: "Количество транзакций за последние {window} дней"
+
+  ratios:
+    - name_pattern: "{col}_to_mean_{window}d"
+      description: "Отношение текущего значения к среднему за {window} дней"
+
+  velocity:
+    - name: "txn_count_last_1h"
+      description: "Количество транзакций за последний час"
+    - name: "txn_count_last_24h"
+      description: "Количество транзакций за последние 24 часа"
+
+# Конфигурация детектора дрейфа
+drift_detection:
+  psi_threshold: 0.25
+  drift_feature_ratio_threshold: 0.20
+  alert_flag: "NEED_RETRAIN"
+  n_bins: 10
